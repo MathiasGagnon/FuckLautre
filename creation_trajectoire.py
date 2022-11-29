@@ -34,6 +34,7 @@ section5_obstacle_radius = 7
 section6_length = 165
 section6_obstacle_height = 5
 section6_obstacle_radius = 7
+end_of_path_length = 20
 
 # -------------------------------------------------------------------
 # path_collection
@@ -273,8 +274,8 @@ bpy.context.active_object.name = 'section6_line_165mm'
 # -------------------------------------------------------------------
 # path_collection/obstacles_collection
 # -------------------------------------------------------------------
-section6_collection = bpy.data.collections.new('obstacles_collection')
-path_collection.children.link(section6_collection)
+obstacles_collection = bpy.data.collections.new('obstacles_collection')
+path_collection.children.link(obstacles_collection)
 layer_collection = bpy.context.view_layer.layer_collection
 sub_layer_collection = recursive_find_layer_collection(layer_collection, 'obstacles_collection')
 bpy.context.view_layer.active_layer_collection = sub_layer_collection
@@ -306,6 +307,30 @@ bpy.ops.mesh.primitive_cylinder_add(
         rotation=(0, 0, 0)
     )
 bpy.context.active_object.name = 'section6_obstacle'
+
+# -------------------------------------------------------------------
+# path_collection/end_of_path_collection
+# -------------------------------------------------------------------
+end_of_path_collection = bpy.data.collections.new('end_of_path_collection')
+path_collection.children.link(end_of_path_collection)
+layer_collection = bpy.context.view_layer.layer_collection
+sub_layer_collection = recursive_find_layer_collection(layer_collection, 'end_of_path_collection')
+bpy.context.view_layer.active_layer_collection = sub_layer_collection
+
+bpy.ops.mesh.primitive_cube_add(
+        size=1,
+        enter_editmode=False,
+        align='WORLD', 
+        location=(
+            -(section5_length/2)+section2_radius+section3_length-path_width/2-section5_length-section6_length/2,
+        path_width*1.5-section1_length-section2_radius-2*section4_radius,
+        path_height/2
+        ),
+        scale=(path_width, end_of_path_length, path_height),
+        rotation=(0, 0, 0)
+    )
+bpy.context.active_object.name = 'end_of_path'
+
 # -------------------------------------------------------------------
 # end
 # -------------------------------------------------------------------
