@@ -61,8 +61,8 @@ follower_captors_height = 0.2
 invisible_cylinder_radius = 1.8
 invisible_cylinder_height = 2
 
-invisible_cone_radius = 8
-invisible_cone_length = 14
+invisible_cone_radius = 29.4448637287/2
+invisible_cone_length = 51
 
 #------------------------
 #Gravity changes
@@ -248,38 +248,15 @@ layer_collection = bpy.context.view_layer.layer_collection
 sub_layer_collection = recursive_find_layer_collection(layer_collection, 'invisible_cone_collection')
 bpy.context.view_layer.active_layer_collection = sub_layer_collection
 bpy.ops.mesh.primitive_cone_add(
-radius1=4, 
+radius1=invisible_cone_radius, 
 radius2=0,
-depth=14, 
+depth=invisible_cone_length, 
 enter_editmode=False, 
 align='WORLD', 
-location=(sonars_panel_width/2-sonar_radius-1, car_push_back-7, wheel_radius+body_height/2+ball_cup_height+sonars_panel_height/2),
+location=(sonars_panel_width/2-sonar_radius-1, car_push_back-invisible_cone_length/2, wheel_radius+body_height/2+ball_cup_height+sonars_panel_height/2),
 rotation=(-np.pi/2, 0, 0), 
 scale=(1, 1, 1))
 bpy.context.active_object.name = 'invisible_cone'
-
-bpy.context.scene.tool_settings.use_transform_data_origin = True
-bpy.ops.transform.translate(
-value=(0, 7, 0), 
-orient_axis_ortho='X', 
-orient_type='GLOBAL', 
-orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), 
-orient_matrix_type='GLOBAL', 
-constraint_axis=(False, True, False), 
-mirror=False, 
-use_proportional_edit=False, 
-proportional_edit_falloff='SMOOTH', 
-proportional_size=1, 
-use_proportional_connected=False, 
-use_proportional_projected=False, 
-snap=False, snap_elements={'INCREMENT'}, 
-use_snap_project=False, 
-snap_target='CLOSEST', 
-use_snap_self=False, 
-use_snap_edit=False, 
-use_snap_nonedit=False, use_snap_selectable=False, release_confirm=True
-)
-bpy.context.scene.tool_settings.use_transform_data_origin = False
 
 bpy.ops.object.modifier_add(type='MASK')
 # -----------------------------------------------------------------------------

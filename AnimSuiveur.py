@@ -308,6 +308,8 @@ def main():
     cone = bpy.data.collections['invisible_cone_collection'].all_objects[0]
     emetteur_pos = cone.location
 
+    #emeteur_base_pos = Vector((1.7,-5,12)) #position originelle de l'émetteur (tres batard comme valeur) (a voir)
+    #delta_emetteur_pos = emeteur_base_pos -emetteur_pos# Valeur batarde pour calculer le delta entre l'origine et le modèle physique (a voir)
     
     frame_counter = 0
     current_speed = 0
@@ -317,8 +319,6 @@ def main():
     angle_momento = 0
     frame_counter_momento = 0
     car_position_momento = 0
-    
-    change_cone(cone,np.pi/6,duree_Imp(DUREE_IMP)) #a valider avec phil
     
     while frame_counter < 2000:
         bpy.context.view_layer.update()
