@@ -247,20 +247,6 @@ bpy.ops.mesh.primitive_cube_add(
 )
 bpy.context.active_object.name = 'section5_line_165mm'
 
-bpy.ops.mesh.primitive_cylinder_add(
-        radius=section5_obstacle_radius,
-        enter_editmode=False,
-        align='WORLD', 
-        location=(
-            section2_radius+section3_length-path_width/2-section5_length/2,
-            path_width*1.5-section1_length-section2_radius-2*section4_radius,
-            section5_obstacle_height
-        ),
-        scale=(1, 1, section5_obstacle_height),
-        rotation=(0, 0, 0)
-    )
-bpy.context.active_object.name = 'section5_obstacle'
-
 # -------------------------------------------------------------------
 # path_collection/section6_collection
 # -------------------------------------------------------------------
@@ -284,6 +270,29 @@ bpy.ops.mesh.primitive_cube_add(
 )
 bpy.context.active_object.name = 'section6_line_165mm'
 
+# -------------------------------------------------------------------
+# path_collection/obstacles_collection
+# -------------------------------------------------------------------
+section6_collection = bpy.data.collections.new('obstacles_collection')
+path_collection.children.link(section6_collection)
+layer_collection = bpy.context.view_layer.layer_collection
+sub_layer_collection = recursive_find_layer_collection(layer_collection, 'obstacles_collection')
+bpy.context.view_layer.active_layer_collection = sub_layer_collection
+
+bpy.ops.mesh.primitive_cylinder_add(
+        radius=section5_obstacle_radius,
+        enter_editmode=False,
+        align='WORLD', 
+        location=(
+            section2_radius+section3_length-path_width/2-section5_length/2,
+            path_width*1.5-section1_length-section2_radius-2*section4_radius,
+            section5_obstacle_height
+        ),
+        scale=(1, 1, section5_obstacle_height),
+        rotation=(0, 0, 0)
+    )
+bpy.context.active_object.name = 'section5_obstacle'
+
 bpy.ops.mesh.primitive_cylinder_add(
         radius=section5_obstacle_radius,
         enter_editmode=False,
@@ -297,7 +306,6 @@ bpy.ops.mesh.primitive_cylinder_add(
         rotation=(0, 0, 0)
     )
 bpy.context.active_object.name = 'section6_obstacle'
-
 # -------------------------------------------------------------------
 # end
 # -------------------------------------------------------------------

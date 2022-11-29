@@ -18,7 +18,7 @@ def recursive_find_layer_collection(layer_collection, collection_name):
 # dimensions
 # -----------------------------------------------------------------------------
 
-car_push_back = 20
+car_push_back = -5
 
 wheel_radius = 4
 wheel_width = 1.5
@@ -63,6 +63,11 @@ invisible_cylinder_height = 2
 
 invisible_cone_radius = 8
 invisible_cone_length = 14
+
+#------------------------
+#Gravity changes
+#------------------------
+bpy.context.scene.gravity[2] = -98.1
 
 # -----------------------------------------------------------------------------
 # car_collection
@@ -182,7 +187,6 @@ bpy.context.active_object.name = 'pebble_cup'
 bpy.ops.rigidbody.object_add()
 bpy.context.object.rigid_body.type = 'PASSIVE'
 bpy.context.object.rigid_body.kinematic = True
-bpy.context.object.rigid_body.collision_shape = 'MESH'
 bpy.context.object.rigid_body.mesh_source = 'FINAL'
 bpy.context.object.rigid_body.friction = 0.5
 
@@ -366,6 +370,7 @@ bpy.data.objects['follower_plate_connector'].select_set(True)
 bpy.data.objects['right_sonar'].select_set(True)
 bpy.data.objects['left_sonar'].select_set(True)
 bpy.data.objects['sonars_panel'].select_set(True)
+bpy.data.objects['invisible_cone'].select_set(True)
 #bpy.data.objects['pebble_cup'].select_set(True)
 for i in range(0, 2):
     bpy.data.objects['front_wheel_'+str(i)].select_set(True)
