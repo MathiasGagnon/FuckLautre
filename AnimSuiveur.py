@@ -6,7 +6,7 @@ import bpy
 import math
 from math import tan
 import numpy as np
-from mathutils import Vector
+from mathutils import Vector,Euler
 from mathutils.bvhtree import BVHTree
 
 # -----------------------------------------------------------------------------
@@ -33,7 +33,7 @@ AVOID_STATE_SEQUENCE = [AVOIDING_OBSTACLE_WAIT, AVOIDING_OBSTACLE_GO_BACKWARDS, 
 FOUND_LINE = -1
 DUREE_IMP:float = 300/1000 # temps de l'impulsion
 TEMPS_BEFORE_INTERRUPT:list[int] = [] # Liste des durée de chacunes des impulsions envoyées
-
+EMETTEUR_BASE_POS = Vector((1.7,-5,12)) #position originelle de l'émetteur NE PAS CHANGER AND I HATE IT
 
 
 # -----------------------------------------------------------------------------
@@ -308,8 +308,7 @@ def main():
     cone = bpy.data.collections['invisible_cone_collection'].all_objects[0]
     emetteur_pos = cone.location
 
-    #emeteur_base_pos = Vector((1.7,-5,12)) #position originelle de l'émetteur (tres batard comme valeur) (a voir)
-    #delta_emetteur_pos = emeteur_base_pos -emetteur_pos# Valeur batarde pour calculer le delta entre l'origine et le modèle physique (a voir)
+    delta_emetteur_pos = EMETTEUR_BASE_POS -emetteur_pos# Valeur batarde pour calculer le delta entre l'origine et le modèle physique 
     
     frame_counter = 0
     current_speed = 0
@@ -322,8 +321,8 @@ def main():
     
     while frame_counter < 2000:
         bpy.context.view_layer.update()
-        
-        dmin,temps_dmin = sonar(obs_list=obstacles,cone=cone,emetteur_pos=emetteur_pos) # Do some shit to make it work
+
+        dmin,temps_dmin = sonar(obs_list=obstacles,cone=cone,emetteur_pos=emetteur_pos+delta_emetteur_pos) # Do some shit to make it work
         stop_time = time_to_stop(current_speed)
         stop_distance = 10+distance_to_stop(stop_time)
         
@@ -377,7 +376,7 @@ def main():
             if frame_counter_momento == 0: frame_counter_momento = frame_counter
             frame_delta = frame_counter - frame_counter_momento
             
-            print("Current frame delta: " + str(frame_delta) + " Target angle: " + str(target_angle) + " Frame: " + str(frame_counter))
+            #print("Current frame delta: " + str(frame_delta) + " Target angle: " + str(target_angle) + " Frame: " + str(frame_counter))
             
             if frame_delta < OBSTACLE_AVOID_FRAME_GAP: target_angle = 45
             elif frame_delta >= OBSTACLE_AVOID_FRAME_GAP and frame_delta < 2*OBSTACLE_AVOID_FRAME_GAP: target_angle = 0
@@ -394,7 +393,7 @@ def main():
                    
         move_car(car, current_speed)
         rotate_car(car, target_angle, current_state)
-            
+        delta_emetteur_pos.rotate(Euler((0,0,cone.rotation_euler[2]),'XYZ'))    
         for object in car:
             object.keyframe_insert(data_path="location", frame = frame_counter)
             object.keyframe_insert(data_path="rotation_euler", frame = frame_counter)
