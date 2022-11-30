@@ -152,7 +152,6 @@ bpy.context.active_object.name = 'pebble'
 #Appliquer RigidBody
 bpy.ops.rigidbody.object_add()
 bpy.context.object.rigid_body.friction = 0.5
-bpy.context.object.rigid_body.collision_shape = 'MESH'
 bpy.context.object.rigid_body.mesh_source = 'FINAL'
 
 # -----------------------------------------------------------------------------
@@ -187,6 +186,7 @@ bpy.context.active_object.name = 'pebble_cup'
 bpy.ops.rigidbody.object_add()
 bpy.context.object.rigid_body.type = 'PASSIVE'
 bpy.context.object.rigid_body.kinematic = True
+bpy.context.object.rigid_body.collision_shape = 'MESH'
 bpy.context.object.rigid_body.mesh_source = 'FINAL'
 bpy.context.object.rigid_body.friction = 0.5
 
@@ -364,3 +364,4 @@ bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
 # -----------------------------------------------------------------------------
 # end
 # -----------------------------------------------------------------------------
+
