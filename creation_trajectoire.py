@@ -285,7 +285,7 @@ bpy.ops.mesh.primitive_cylinder_add(
         enter_editmode=False,
         align='WORLD', 
         location=(
-            section2_radius+section3_length-path_width/2-section5_length/2,
+            section2_radius+section3_length-path_width/2-section5_length/2 - 50,
             path_width*1.5-section1_length-section2_radius-2*section4_radius,
             section5_obstacle_height
         ),
@@ -293,20 +293,6 @@ bpy.ops.mesh.primitive_cylinder_add(
         rotation=(0, 0, 0)
     )
 bpy.context.active_object.name = 'section5_obstacle'
-
-bpy.ops.mesh.primitive_cylinder_add(
-        radius=section5_obstacle_radius,
-        enter_editmode=False,
-        align='WORLD', 
-        location=(
-            section2_radius+section3_length-path_width/2-section5_length-section6_length/2,
-            path_width*1.5-section1_length-section2_radius-2*section4_radius,
-            section6_obstacle_height
-        ),
-        scale=(1, 1, section6_obstacle_height),
-        rotation=(0, 0, 0)
-    )
-bpy.context.active_object.name = 'section6_obstacle'
 
 # -------------------------------------------------------------------
 # path_collection/end_of_path_collection
