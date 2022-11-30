@@ -19,9 +19,9 @@ BACKWARD_ACCELERATION = -0.3/FPS
 FORWARD_TURNING_INCREMENT = 1*np.pi/180
 BACKWARDS_TURNING_INCREMENT = 0.5*np.pi/180
 MAX_SPEED = 0.54
-OBSTABLE_WAIT_TIME = 2 #in seconds
-OBSTABLE_BACKWARDS_DISTANCE = 2 #20 cm
-OBSTACLE_AVOID_FRAME_GAP = 36
+OBSTABLE_WAIT_TIME = 4 #in seconds
+OBSTABLE_BACKWARDS_DISTANCE = 20 #20 cm
+OBSTACLE_AVOID_FRAME_GAP = 60
 OBSTACLE_AVOID_ANGLE_SEQUENCE = [45, 0, -45, 0]
 LOST_LINE = 0
 ALL_GOOD = 1
@@ -254,7 +254,7 @@ def follow_line(captors_cylinders, captors_lights, current_speed, target_angle, 
     captors_readings = read_captors(get_bhv_track(), captors_cylinders, captors_lights, frame_counter)
     if captors_readings == [0, 0, 0, 0, 0]:
         return LOST_LINE, -target_angle, current_speed
-    elif captors_readings == [1,1,1,1,1]: END_OF_PATH, 0, current_speed
+    elif captors_readings == [1,1,1,1,1]: return END_OF_PATH, 0, current_speed
     target_angle = get_target_angle(captors_readings)   
     current_speed = change_car_speed(FORWARD_ACCELERATION, current_speed)
     return ALL_GOOD, target_angle, current_speed
@@ -327,7 +327,7 @@ def main():
         stop_distance = 10+distance_to_stop(stop_time)
         
         #print("dmin: " + str(dmin) + " detection distance: " + str(stop_distance) + " frame: " + str())
-        if dmin <= 10 and dmin != -1 and current_state not in AVOID_STATE_SEQUENCE: current_state = AVOIDING_OBSTACLE_WAIT
+        if dmin <= 30 and dmin != -1 and current_state not in AVOID_STATE_SEQUENCE: current_state = AVOIDING_OBSTACLE_WAIT
 
         if current_state == ALL_GOOD:
             current_state, target_angle, current_speed = follow_line(captors_cylinders, captors_lights, current_speed, target_angle, frame_counter)
@@ -383,13 +383,14 @@ def main():
             elif frame_delta >= 2*OBSTACLE_AVOID_FRAME_GAP and frame_delta < 3*OBSTACLE_AVOID_FRAME_GAP: target_angle = -45
             elif frame_delta >= 3*OBSTACLE_AVOID_FRAME_GAP and frame_delta < 4*OBSTACLE_AVOID_FRAME_GAP: target_angle = 0
             elif frame_delta >= 4*OBSTACLE_AVOID_FRAME_GAP and frame_delta < 5*OBSTACLE_AVOID_FRAME_GAP: target_angle = -45
-            elif frame_delta >= 5*OBSTACLE_AVOID_FRAME_GAP and frame_delta < 6*OBSTACLE_AVOID_FRAME_GAP: target_angle = 0
-            elif frame_delta >= 6*OBSTACLE_AVOID_FRAME_GAP and frame_delta < 7*OBSTACLE_AVOID_FRAME_GAP: target_angle = 45
-            elif frame_delta >= 7*OBSTACLE_AVOID_FRAME_GAP and frame_delta < 8*OBSTACLE_AVOID_FRAME_GAP: target_angle = 0 
+            elif frame_delta >= 5*OBSTACLE_AVOID_FRAME_GAP and frame_delta < 5.3*OBSTACLE_AVOID_FRAME_GAP: target_angle = 0
+            elif frame_delta >= 5.3*OBSTACLE_AVOID_FRAME_GAP and frame_delta < 6.3*OBSTACLE_AVOID_FRAME_GAP: target_angle = 45
+            #elif frame_delta >= 7*OBSTACLE_AVOID_FRAME_GAP and frame_delta < 8*OBSTACLE_AVOID_FRAME_GAP: target_angle = 0 
             else: current_state = ALL_GOOD
         
         elif current_state == END_OF_PATH:
-            if current_speed > 0: current_speed = change_car_speed(FORWARD_ACCELERATION, current_speed)
+            if current_speed > 0: current_speed = change_car_speed(BACKWARD_ACCELERATION, current_speed)
+            if current_speed <= 0: current_speed = 0
                    
         move_car(car, current_speed)
         rotate_car(car, target_angle, current_state)
