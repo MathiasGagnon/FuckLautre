@@ -290,25 +290,6 @@ bpy.ops.mesh.primitive_cube_add(
 bpy.context.active_object.name = 'follower_plate'
 
 # -----------------------------------------------------------------------------
-# car_collection/follower_collection/follower_captors_collection
-# -----------------------------------------------------------------------------
-
-follower_captors_collection = bpy.data.collections.new('follower_captors_collection')
-follower_collection.children.link(follower_captors_collection)
-layer_collection = bpy.context.view_layer.layer_collection
-sub_layer_collection = recursive_find_layer_collection(layer_collection, 'follower_captors_collection')
-bpy.context.view_layer.active_layer_collection = sub_layer_collection
-
-for i in range(0, 5):
-    bpy.ops.object.light_add(
-        type='POINT',
-        location=(0+(i-2)*follower_plate_width/5, car_push_back-follower_plate_length/2-follower_plate_connector_length, wheel_radius-body_height/2-follower_captors_height/2/2),
-        scale=(0.5, 0.5, 0.5),
-        rotation=(0, -180*np.pi/180, 0)
-    )
-    bpy.context.active_object.name = 'follower_captor_'+str(i)
-
-# -----------------------------------------------------------------------------
 # car_collection/follower_collection/invisible_cylinders
 # -----------------------------------------------------------------------------
 
@@ -341,14 +322,12 @@ bpy.context.view_layer.active_layer_collection = sub_layer_collection
 
 for i in range(0, 5):
     bpy.data.objects['invisble_cylinder_'+str(i)].select_set(True)
-    bpy.data.objects['follower_captor_'+str(i)].select_set(True)
 bpy.data.objects['follower_plate'].select_set(True)
 bpy.data.objects['follower_plate_connector'].select_set(True)
 bpy.data.objects['right_sonar'].select_set(True)
 bpy.data.objects['left_sonar'].select_set(True)
 bpy.data.objects['sonars_panel'].select_set(True)
 bpy.data.objects['invisible_cone'].select_set(True)
-#bpy.data.objects['pebble_cup'].select_set(True)
 for i in range(0, 2):
     bpy.data.objects['front_wheel_'+str(i)].select_set(True)
 for i in range(0, 2):

@@ -19,7 +19,7 @@ BACKWARD_ACCELERATION = -0.3/FPS
 FORWARD_TURNING_INCREMENT = 1*np.pi/180
 BACKWARDS_TURNING_INCREMENT = 0.5*np.pi/180
 MAX_SPEED = 0.54
-OBSTABLE_WAIT_TIME = 4 #in seconds
+OBSTABLE_WAIT_TIME = 3.5 #in seconds
 OBSTABLE_BACKWARDS_DISTANCE = 20 #20 cm
 OBSTACLE_AVOID_FRAME_GAP = 60
 OBSTACLE_AVOID_ANGLE_SEQUENCE = [45, 0, -45, 0]
@@ -135,7 +135,7 @@ def change_cone(cone,angle:float,length:float)->None:
 # returns the list of active captors
 # -----------------------------------------------------------------------------
         
-def read_captors(bhv_track, captors_cylinders, captors_lights, current_frame):
+def read_captors(bhv_track, captors_cylinders, current_frame):
     captors_lights_index = 0
     captors_readings = [0, 0, 0, 0, 0]
     
@@ -151,12 +151,8 @@ def read_captors(bhv_track, captors_cylinders, captors_lights, current_frame):
                 cylinder_track_overlap = True
         
         if cylinder_track_overlap:
-            #captors_lights[captors_lights_index].data.energy = 1000
             captors_readings[captors_lights_index] = 1
-        #else:
-            #captors_lights[captors_lights_index].data.energy = 0
 
-        #captors_lights[captors_lights_index].data.keyframe_insert(data_path="energy", frame = current_frame)
         captors_lights_index+=1
 
     return captors_readings
@@ -250,8 +246,8 @@ def change_car_speed(increment, current_speed):
 # return the status of the line following, the target angle and current speed
 # -----------------------------------------------------------------------------
 
-def follow_line(captors_cylinders, captors_lights, current_speed, target_angle, frame_counter):
-    captors_readings = read_captors(get_bhv_track(), captors_cylinders, captors_lights, frame_counter)
+def follow_line(captors_cylinders,  current_speed, target_angle, frame_counter):
+    captors_readings = read_captors(get_bhv_track(), captors_cylinders, frame_counter)
     if captors_readings == [0, 0, 0, 0, 0]:
         return LOST_LINE, -target_angle, current_speed
     elif captors_readings == [1,1,1,1,1]: return END_OF_PATH, 0, current_speed
@@ -264,8 +260,8 @@ def follow_line(captors_cylinders, captors_lights, current_speed, target_angle, 
 # algorithm that searches for the line
 # -----------------------------------------------------------------------------
 
-def searching_line(captors_cylinders, captors_lights, current_speed, target_angle, frame_counter):    
-    captors_readings = read_captors(get_bhv_track(), captors_cylinders, captors_lights, frame_counter)  
+def searching_line(captors_cylinders, current_speed, target_angle, frame_counter):    
+    captors_readings = read_captors(get_bhv_track(), captors_cylinders, frame_counter)  
     if captors_readings != [0, 0, 0, 0, 0]:
         return FOUND_LINE, -target_angle, current_speed    
     current_speed = change_car_speed(BACKWARD_ACCELERATION, current_speed)
@@ -302,7 +298,6 @@ def distance_to_stop(time_to_stop):
 
 def main():
     captors_cylinders = bpy.data.collections['invisible_cylinders_collection'].all_objects
-    captors_lights = bpy.data.collections['follower_captors_collection'].all_objects
     car = bpy.data.collections['car_collection'].all_objects
     obstacles = bpy.data.collections['obstacles_collection'].all_objects
     cone = bpy.data.collections['invisible_cone_collection'].all_objects[0]
@@ -326,22 +321,20 @@ def main():
         stop_time = time_to_stop(current_speed)
         stop_distance = 10+distance_to_stop(stop_time)
         
-        #print("dmin: " + str(dmin) + " detection distance: " + str(stop_distance) + " frame: " + str())
         if dmin <= 30 and dmin != -1 and current_state not in AVOID_STATE_SEQUENCE: current_state = AVOIDING_OBSTACLE_WAIT
 
         if current_state == ALL_GOOD:
-            current_state, target_angle, current_speed = follow_line(captors_cylinders, captors_lights, current_speed, target_angle, frame_counter)
+            current_state, target_angle, current_speed = follow_line(captors_cylinders,  current_speed, target_angle, frame_counter)
 
         elif current_state == LOST_LINE and current_speed >= 0:
             
-            #if(angle_momento == 0 and target_angle != 0): 
             angle_momento = -target_angle
             target_angle = 0
             current_speed = change_car_speed(BACKWARD_ACCELERATION, current_speed)
 
         elif current_state == LOST_LINE and current_speed <= 0:
             target_angle = angle_momento
-            current_state, target_angle, current_speed = searching_line(captors_cylinders, captors_lights, current_speed, target_angle, frame_counter)
+            current_state, target_angle, current_speed = searching_line(captors_cylinders, current_speed, target_angle, frame_counter)
             
         elif current_state == FOUND_LINE and current_speed <= 0:
             current_speed = change_car_speed(FORWARD_ACCELERATION, current_speed)
@@ -355,7 +348,6 @@ def main():
             if frame_counter_momento == 0: frame_counter_momento = frame_counter
             
             if current_speed > 0: current_speed = change_car_speed(BACKWARD_ACCELERATION, current_speed)
-            #print("Time waited: " + str((frame_counter-frame_counter_momento)/FPS))
             if ((frame_counter-frame_counter_momento)/FPS) >= OBSTABLE_WAIT_TIME:
                 current_state = AVOIDING_OBSTACLE_GO_BACKWARDS
             
@@ -365,9 +357,7 @@ def main():
             if car_position_momento == 0: car_position_momento = car[0].location[0]
             
             current_speed = change_car_speed(BACKWARD_ACCELERATION, current_speed)
-            #print("Current speed: " + str(current_speed) + " Frame: " + str(frame_counter))
             if (car[0].location[0]-car_position_momento) >= OBSTABLE_BACKWARDS_DISTANCE:
-                #print("Current location delta: " + str(car[0].location[0]-car_position_momento) + " Frame: " + str(frame_counter))
                 current_state = AVOIDING_OBSTACLE_GO_AROUND
                 
         elif current_state == AVOIDING_OBSTACLE_GO_AROUND:
@@ -376,8 +366,6 @@ def main():
             if frame_counter_momento == 0: frame_counter_momento = frame_counter
             frame_delta = frame_counter - frame_counter_momento
             
-            #print("Current frame delta: " + str(frame_delta) + " Target angle: " + str(target_angle) + " Frame: " + str(frame_counter))
-            
             if frame_delta < OBSTACLE_AVOID_FRAME_GAP: target_angle = 45
             elif frame_delta >= OBSTACLE_AVOID_FRAME_GAP and frame_delta < 2*OBSTACLE_AVOID_FRAME_GAP: target_angle = 0
             elif frame_delta >= 2*OBSTACLE_AVOID_FRAME_GAP and frame_delta < 3*OBSTACLE_AVOID_FRAME_GAP: target_angle = -45
@@ -385,7 +373,6 @@ def main():
             elif frame_delta >= 4*OBSTACLE_AVOID_FRAME_GAP and frame_delta < 5*OBSTACLE_AVOID_FRAME_GAP: target_angle = -45
             elif frame_delta >= 5*OBSTACLE_AVOID_FRAME_GAP and frame_delta < 5.3*OBSTACLE_AVOID_FRAME_GAP: target_angle = 0
             elif frame_delta >= 5.3*OBSTACLE_AVOID_FRAME_GAP and frame_delta < 6.3*OBSTACLE_AVOID_FRAME_GAP: target_angle = 45
-            #elif frame_delta >= 7*OBSTACLE_AVOID_FRAME_GAP and frame_delta < 8*OBSTACLE_AVOID_FRAME_GAP: target_angle = 0 
             else: current_state = ALL_GOOD
         
         elif current_state == END_OF_PATH:
